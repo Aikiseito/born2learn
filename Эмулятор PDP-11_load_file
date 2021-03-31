@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#define MEMSIZE (64 * 1024)
+
+typedef unsigned char byte; // 8 bit
+typedef unsigned short int word; // 16 bit
+typedef word adr; // 16 bit
+
+byte mem[MEMSIZE];
+
+byte b_read  (adr a) {
+	return mem[a];
+}
+
+void b_write (adr a, byte val) {
+	mem[a] = val;
+}
+
+word w_read  (adr a) {
+	word w = mem[a + 1] << 8;
+	w = w | mem[a];
+	return w;
+}
+
+void w_write (adr a, word val) {
+	mem[a + 1] = (val >> 8);
+	mem[a] = val;
+}
+
+void load_file (const char * filename) {
+	FILE *f;
+	f = fopen(filename, "r");
+	adr a;
+	int num, i;
+	byte b;
+	while(fscanf(f, "%hx%x", &a, &num) == 2){
+		for (i = 0; i < num; i++) {
+			fscanf(f, "%hhx", &b);
+			b_write(a, b);
+			a++;
+		}
+	}
+	fclose(f);
+}
+
+void load_file_stdin () {
+	adr a;
+	int num, i;
+	byte b;
+	while(scanf("%hx%x", &a, &num) == 2){
+		for (i = 0; i < num; i++) {
+			scanf("%hhx", &b);
+			b_write(a, b);
+			a++;
+		}
+	}
+}
+
+void mem_dump(adr start, word n) {
+	int i;
+	adr a = start;
+	for (i = 0; i < n; i+=2) {
+		printf("%06ho : %06ho\n", a, w_read(a));
+		a += 2;
+	}
+}
+
+void mem_dump_byte(adr start, byte n) {
+	int i;
+	adr a = start;
+	for (i = 0; i < n; i++) {
+		printf("%hx : %hx\n", a, b_read(a));
+		a++;
+	}
+}
+
+int main() {
+	printf("File name:\n");
+	char * s;
+	scanf("%ms", &s);
+	load_file(s);
+	free(s);
+	//mem_dump_byte(0x40, 4);
+	mem_dump(0x40, 4);
+	return 0;
+}
