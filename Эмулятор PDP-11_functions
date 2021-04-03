@@ -1,12 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
-#define MEMSIZE (64 * 1024)
-
-typedef unsigned char byte;
-typedef unsigned short int word;
-typedef word adr;
+#include "pdp11.h"
 
 byte mem[MEMSIZE];
 
@@ -56,9 +51,4 @@ void test_mem() {
 	w_write(a, w3);
 	byte bres1 = b_read(a+1), bres2 = b_read(a);
 	assert((word)(bres1 << 8 | bres2) == w3);
-}
-
-int main() {
-	test_mem();
-	return 0;
 }
