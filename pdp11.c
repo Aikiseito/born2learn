@@ -13,6 +13,7 @@ int main(int argc, char * argv[]) {
 		x = argv[1];
 		load_file(argv[2]);
 		mem_dump(0x40, 4);
+		run();
 	}
 	return 0;
 }
