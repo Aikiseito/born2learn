@@ -67,35 +67,23 @@ void trace(const char * format, ...) {
 }
 
 void load_file (const char * filename) {
-	if (filename == NULL) {
-		adr a;
-		int num, i;
-		byte b;
-		while(scanf("%hx%x", &a, &num) == 2){
-			printf("num = %hhx\n", num);
-			for (i = 0; i < num; i++) {
-				scanf("%hhx", &b);
-				b_write(a, b);
-				trace("%hhx %hx", b, a);
-				a++;
-			}
+	adr a;
+	int num, i;
+	byte b;
+	FILE * f = stdin;
+	if (filename != NULL)
+		f = fopen(filename, "r");
+	while(fscanf(f, "%hx%x", &a, &num) == 2){
+		printf("num = %hhx\n", num);
+		for (i = 0; i < num; i++) {
+			fscanf(f, "%hhx", &b);
+			b_write(a, b);
+			trace("%hhx %hx", b, a);
+			a++;
 		}
-	} else {
-		FILE *f = fopen(filename, "r");
-		adr a;
-		int num, i;
-		byte b;
-		while(fscanf(f, "%hx%x", &a, &num) == 2){
-			printf("num = %hhx\n", num);
-			for (i = 0; i < num; i++) {
-				fscanf(f, "%hhx", &b);
-				b_write(a, b);
-				trace("%hhx %hx", b, a);
-				a++;
-			}
-		}
-		fclose(f);
 	}
+	if (filename != NULL)
+		fclose(f);
 }
 
 void mem_dump(adr start, word n) {
