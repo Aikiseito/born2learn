@@ -5,7 +5,7 @@ extern byte mem[MEMSIZE];
 extern char * x;
 
 int main(int argc, char * argv[]) {
-	if (argc < 3) {
+	if (argc < 2) {
 		printf("Usage: options, name_of_input_file\n\n");
 		printf("Options:\n-t: show trace to stderr\n-q: quiet, don't show anything except target's output\n\n");
 	}
