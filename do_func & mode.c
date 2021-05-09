@@ -36,6 +36,46 @@ Arg get_mr(word w) {
 			else
 				trace("(R%o)+ ", r);
 			break;
+		case 3:				//мода 3 @(R3)+
+			res.adr = reg[r];
+			res.adr = w_read(res.adr);
+			res.val = w_read(res.adr);
+			reg[r] += 2;
+			if (r == 7)
+				trace("@#%o", res.val);
+			else
+				trace("@(R%o)+", r);
+			break;
+		case 4:
+			reg[r] -= 2;
+			res.adr = reg[r];
+			res.val = w_read(res.adr);
+			if (r == 7)
+				trace("(-#%o) ", res.val);
+			else
+				trace("-(R%o) ", r);
+			break;
+		case 5:
+			reg[r] -= 2;
+			res.adr = reg[r];
+			res.adr = w_read(res.adr);
+			res.val = w_read(res.adr);
+			if (r == 7)
+				trace("@-#%o", res.val);
+			else
+				trace("@-(R%o)", r);
+			break;
+		case 6:
+			reg[7] += 2;
+			res.adr = 2 * reg[7] - 2;
+			res.val = w_read(res.adr);
+			break;
+		case 7:
+			reg[7] += 2;
+			res.adr = 2 * reg[7] - 2;
+			res.adr = w_read(res.adr);
+			res.val = w_read(res.adr);
+			break;
 		default:
 			fprintf(stderr, "Mode %o NOT IMPLEMENTED YET!\n", m);
 			exit(1);
@@ -53,14 +93,18 @@ void do_halt() {
 void do_mov(Par p) {
 	trace("mov");
 	w_write(p.dd.adr, p.ss.val);
-	reg[p.dd.adr] = p.ss.val;
+	if (p.dd.adr < 8) {
+		reg[p.dd.adr] = p.ss.val;
+	}
 }
 
 void do_add(Par p) {
 	trace("add");
 	word w = w_read(p.dd.adr);
 	w_write(p.dd.adr, w + p.ss.val);
-	reg[p.dd.adr] = w + p.ss.val;
+	if (p.dd.adr < 8) {
+		reg[p.dd.adr] = w + p.ss.val;
+	}
 }
 
 void do_nothing() {}
