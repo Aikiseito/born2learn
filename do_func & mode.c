@@ -7,6 +7,8 @@ word reg[8]; // регистры R0 .. R7
 #define NO_PARAMS 0
 #define HAS_DD 1
 #define HAS_SS 2
+#define HAS_R 4
+#define HAS_NN 8
 extern char * x;
 static Par p;
 
@@ -107,13 +109,31 @@ void do_add(Par p) {
 	}
 }
 
+void do_sob(Par p) {
+	trace("sob");
+	reg[p.r]--;
+	if (reg[p.r] != 0) {
+		pc = pc - 2 * p.nn;
+	}
+}
+
+void do_clr(Par p) {
+	trace("clr");
+	w_write(p.dd.adr, 0);
+	if (p.dd.adr < 8) {
+		reg[p.dd.adr] = 0;
+	}
+}
+
 void do_nothing() {}
 
 Command cmd[] = {
-	{0170000, 0010000, "mov", HAS_DD | HAS_SS, do_mov},
-	{0170000, 0060000, "add", HAS_DD | HAS_SS, do_add},
-	{0177777, 0000000, "halt", NO_PARAMS, do_halt},
-	{0000000, 0000000, "unknown", NO_PARAMS, do_nothing}
+	{0170000, 0010000, HAS_DD | HAS_SS, do_mov},
+	{0170000, 0060000, HAS_DD | HAS_SS, do_add},
+	{0177700, 0005000, HAS_DD, do_clr},
+	{0177000, 0077000, HAS_R | HAS_NN, do_sob},
+	{0177777, 0000000, NO_PARAMS, do_halt},
+	{0000000, 0000000, NO_PARAMS, do_nothing}
 };
 
 void run() {
@@ -125,8 +145,14 @@ void run() {
 		int i = 0;
 		while (1) {
 			if ((w & cmd[i].mask) == cmd[i].opcode) {
-				p.ss = get_mr(w >> 6);
-				p.dd = get_mr(w);
+				if ((cmd[i].param & HAS_SS) == HAS_SS) // xxxx & 0011 == 0011?
+					p.ss = get_mr(w >> 6);
+				if ((cmd[i].param & HAS_DD) == HAS_DD) // xxxx & 0001 == 0001?
+					p.dd = get_mr(w);
+				if ((cmd[i].param & HAS_R) == HAS_R) // xxxx & 0111 == 0111?
+					p.r = (w >> 6) & 1;
+				if ((cmd[i].param & HAS_NN) == HAS_NN) // xxxx & 1111 == 1111?
+					p.nn = w & 077;
 				cmd[i].do_func(p);
 				break;
 			}
