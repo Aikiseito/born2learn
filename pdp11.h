@@ -15,6 +15,8 @@ typedef struct {
 typedef struct {
 	Arg ss;
 	Arg dd;
+	unsigned char r;
+	unsigned char nn;
 } Par;
 
 typedef struct {
