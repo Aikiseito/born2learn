@@ -11,6 +11,7 @@ word reg[8]; // регистры R0 .. R7
 #define HAS_NN 8
 extern char * x;
 static Par p;
+static word is_byte;
 
 Arg ss, dd;
 
@@ -26,13 +27,21 @@ Arg get_mr(word w) {
 			break;
 		case 1:				//мода 1 (R3)
 			res.adr = reg[r];
-			res.val = w_read(res.adr); //todo b_read
+			if (is_byte)
+				res.val = b_read(res.adr);
+			else
+				res.val = w_read(res.adr);
 			trace("(R%o) ", r);
 			break;
 		case 2:				//мода 2 (R3)+	#3
 			res.adr = reg[r];
-			res.val = w_read(res.adr); //todo b_read
-			reg[r] += 2; 				// todo +1
+			if (is_byte) {
+				res.val = b_read(res.adr);
+				reg[r]++;
+			} else {
+				res.val = w_read(res.adr);
+				reg[r] += 2;
+			}
 			if (r == 7)
 				trace("(#%o) ", res.val);
 			else
@@ -40,28 +49,50 @@ Arg get_mr(word w) {
 			break;
 		case 3:				//мода 3 @(R3)+
 			res.adr = reg[r];
-			res.adr = w_read(res.adr);
-			res.val = w_read(res.adr);
-			reg[r] += 2;
+			if (is_byte) {
+				res.adr = b_read(res.adr);
+				res.val = b_read(res.adr);
+				reg[r]++;
+			}
+			else {
+				res.adr = w_read(res.adr);
+				res.val = w_read(res.adr);
+				reg[r] += 2;
+			}
 			if (r == 7)
 				trace("@#%o", res.val);
 			else
 				trace("@(R%o)+", r);
 			break;
 		case 4:
-			reg[r] -= 2;
-			res.adr = reg[r];
-			res.val = w_read(res.adr);
+			if (is_byte) {
+				reg[r]--;
+				res.adr = reg[r];
+				res.val = b_read(res.adr);
+			}
+			else {
+				reg[r] -= 2;
+				res.adr = reg[r];
+				res.val = w_read(res.adr);
+			}
 			if (r == 7)
 				trace("(-#%o) ", res.val);
 			else
 				trace("-(R%o) ", r);
 			break;
 		case 5:
-			reg[r] -= 2;
-			res.adr = reg[r];
-			res.adr = w_read(res.adr);
-			res.val = w_read(res.adr);
+			if (is_byte) {
+				reg[r]--;
+				res.adr = reg[r];
+				res.adr = b_read(res.adr);
+				res.val = b_read(res.adr);
+			}
+			else {
+				reg[r] -= 2;
+				res.adr = reg[r];
+				res.adr = w_read(res.adr);
+				res.val = w_read(res.adr);
+			}
 			if (r == 7)
 				trace("@-#%o", res.val);
 			else
